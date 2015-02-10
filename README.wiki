@@ -1,0 +1,19 @@
+== multiex ==
+Multiex module created for reduce size overhead by a lot of small utilities written in golang.
+If compile every utility independent - each will have 4-6MB overhead by golang runtime and same libraries: fmt, http, etc
+
+Multiex module allow compile many utilities in one binary executable file with once runtime and libraries overhead.
+One of purpose is max simple adaptation current utilities and modules.
+
+
+=== Usage ===
+
+Usage of module very simple:
+# Create a global project, which include all small modules for compile in a binary
+# Register every utility in multiex from source code. It can be do from one main function or every small module can register own commands
+independent from own init function.
+# Compile
+# Create symlinks by command <your-binary> --multiex-command=multiex install
+
+See https://github.com/rekby/multiex-example
+
