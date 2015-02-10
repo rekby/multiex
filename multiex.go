@@ -72,11 +72,13 @@ func Main() {
 	// check explicit command name in first argument
 	if len(os.Args) > 1 && strings.HasPrefix(os.Args[1], "--multiex-command=") {
 		// restore original args while exit
-		oldArgs := os.Args
+		oldArgs := make([]string, len(os.Args))
+        copy(oldArgs, os.Args)
 		defer func() { os.Args = oldArgs }()
 
 		commandName = strings.TrimSpace(os.Args[1])[len("--multiex-command="):]
 		os.Args = os.Args[1:]
+        os.Args[0] = oldArgs[0] // preserve path
 	} else {
 		commandName = os.Args[0]
 	}
