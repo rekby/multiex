@@ -17,3 +17,5 @@ independent from own init function.
 
 See https://github.com/rekby/multiex-example
 
+== Attention ==
+Use named initialize for struct multiex.ExecutorDescribe. It can have additional fields in feauture.
