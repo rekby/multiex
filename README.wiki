@@ -13,7 +13,7 @@ Usage of module very simple:
 # Register every utility in multiex from source code. It can be do from one main function or every small module can register own commands
 independent from own init function.
 # Compile
-# Create symlinks by command <your-binary> --multiex-command=multiex install
+# Create symlinks by command your-binary --multiex-command=multiex install
 
 See https://github.com/rekby/multiex-example
 
