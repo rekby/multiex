@@ -2,6 +2,7 @@ package multiex
 
 import (
 	"os"
+	"path/filepath"
 	"testing"
 )
 
@@ -37,6 +38,38 @@ func TestRegister(t *testing.T) {
 
 	if Register(ExecutorDescribe{Name: "", Function: empty_func}) == nil {
 		t.Error("Must be error when register function with empty name")
+	}
+}
+
+func TestInstall(t *testing.T) {
+	testInit()
+	dir_path, _ := filepath.Abs(os.Args[0])
+	dir_path = filepath.Dir(dir_path)
+	os.Args = []string{os.Args[0], "install"}
+	f := func() {}
+	Register(ExecutorDescribe{Name: "test-1", Function: f})
+	defer func() { os.Remove(filepath.Join(dir_path, "test-1")) }()
+	MultiExUtilsMain()
+	if _, err := os.Stat(filepath.Join(dir_path, "test-1")); os.IsNotExist(err) {
+		t.Error("Create simple link")
+	}
+
+	Register(ExecutorDescribe{Name: "test-2", Function: f})
+	Register(ExecutorDescribe{Name: "test-3", Function: f})
+	defer func() { os.Remove(filepath.Join(dir_path, "test-21")); os.Remove(filepath.Join(dir_path, "test-3")) }()
+	MultiExUtilsMain()
+	if _, err := os.Stat(filepath.Join(dir_path, "test-2")); os.IsNotExist(err) {
+		t.Error("Create second link after first")
+	}
+	if _, err := os.Stat(filepath.Join(dir_path, "test-3")); os.IsNotExist(err) {
+		t.Error("Create third link with second in same time")
+	}
+
+	Register(ExecutorDescribe{Name: "test-noninstall", Function: f, NoInstall: true})
+	defer func() { os.Remove(filepath.Join(dir_path, "test-noninstall")) }()
+	MultiExUtilsMain()
+	if _, err := os.Stat(filepath.Join(dir_path, "test-noninstall")); os.IsExist(err) {
+		t.Error("Don't create executor with NoInstall flag")
 	}
 }
 
@@ -133,30 +166,30 @@ func TestMultiexMain(t *testing.T) {
 		t.Error("Call t3 with args")
 	}
 
-    c4 := false
-    t4 := func(){
-        if len(os.Args) != 3 {
-            return
-        }
-        if os.Args[0] != "any-path" {
-            return
-        }
-        if os.Args[1] != "a1" {
-            return
-        }
-        if os.Args[2] != "a2" {
-            return
-        }
-        c4 = true
-    }
-    Register(ExecutorDescribe{Name: "t4", Function: t4})
-    os.Args = []string{"any-path", "--multiex-command=t4", "a1", "a2"}
-    Main()
-    if len(os.Args) != 4 || os.Args[0] != "any-path" || os.Args[1] != "--multiex-command=t4" || os.Args[2] != "a1" || os.Args[3] != "a2" {
-        t.Error("os.Args preserve when call function t4 by explicit name")
-    }
-    if !c4 {
-        t.Error("Call t4 with args by explicit name")
-    }
+	c4 := false
+	t4 := func() {
+		if len(os.Args) != 3 {
+			return
+		}
+		if os.Args[0] != "any-path" {
+			return
+		}
+		if os.Args[1] != "a1" {
+			return
+		}
+		if os.Args[2] != "a2" {
+			return
+		}
+		c4 = true
+	}
+	Register(ExecutorDescribe{Name: "t4", Function: t4})
+	os.Args = []string{"any-path", "--multiex-command=t4", "a1", "a2"}
+	Main()
+	if len(os.Args) != 4 || os.Args[0] != "any-path" || os.Args[1] != "--multiex-command=t4" || os.Args[2] != "a1" || os.Args[3] != "a2" {
+		t.Error("os.Args preserve when call function t4 by explicit name")
+	}
+	if !c4 {
+		t.Error("Call t4 with args by explicit name")
+	}
 
 }
