@@ -10,7 +10,7 @@ func init() {
 }
 
 func MultiExUtilsMain() {
-	if len(os.Args) > 0 {
+	if len(os.Args) > 1 {
 		switch os.Args[1] {
 		case "ls":
 			printModules()
