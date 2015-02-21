@@ -3,10 +3,11 @@ package multiex
 import (
 	"fmt"
 	"os"
-    "path/filepath")
+	"path/filepath"
+)
 
 func init() {
-	Register(ExecutorDescribe{Name: "multiex", Function: MultiExUtilsMain})
+	Register(ExecutorDescribe{Name: "multiex", Function: MultiExUtilsMain, NoInstall: true})
 }
 
 func MultiExUtilsMain() {
@@ -27,24 +28,28 @@ func MultiExUtilsMain() {
 
 func createSymlinks() {
 	binary_path, err := filepath.Abs(os.Args[0])
-    if err != nil {
-        panic(err)
-    }
-    binary_path, err = filepath.EvalSymlinks(binary_path)
-    if err != nil {
-        panic(err)
-    }
-    basename := filepath.Base(binary_path)
-    dirname := filepath.Dir(binary_path)
-    for _, module := range executors {
-        link_path := filepath.Join(dirname, module.Name)
-        err = os.Symlink(basename, link_path)
-        if os.IsExist(err) {
-            fmt.Printf("File exists: %s\n", link_path)
-        } else if err != nil {
-            fmt.Printf("Error: '%s' while try to create link '%s'\n", err, link_path)
-        }
-    }
+	if err != nil {
+		panic(err)
+	}
+	binary_path, err = filepath.EvalSymlinks(binary_path)
+	if err != nil {
+		panic(err)
+	}
+	basename := filepath.Base(binary_path)
+	dirname := filepath.Dir(binary_path)
+	for _, module := range executors {
+		if module.NoInstall {
+			fmt.Printf("Ignore install by module definition: '%s'\n", module.Name)
+			continue
+		}
+		link_path := filepath.Join(dirname, module.Name)
+		err = os.Symlink(basename, link_path)
+		if os.IsExist(err) {
+			fmt.Printf("File exists: %s\n", link_path)
+		} else if err != nil {
+			fmt.Printf("Error: '%s' while try to create link '%s'\n", err, link_path)
+		}
+	}
 }
 
 func printModules() {

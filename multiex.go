@@ -2,7 +2,7 @@ package multiex
 
 import (
 	"errors"
-    "os"
+	"os"
 	"path"
 	"reflect"
 	"strings"
@@ -11,8 +11,9 @@ import (
 // Struct for describe included commands
 // ATTENTION: don't use short initialization form of structure - it can have additional fields in the feauture.
 type ExecutorDescribe struct {
-	Function func() // Pointer for function
-	Name     string  // Name os command what was called
+	Function  func() // Pointer for function
+	Name      string // Name os command what was called
+	NoInstall bool   // Don't create symlink when multiex install called
 }
 
 type registerQueueTask struct {
@@ -73,12 +74,12 @@ func Main() {
 	if len(os.Args) > 1 && strings.HasPrefix(os.Args[1], "--multiex-command=") {
 		// restore original args while exit
 		oldArgs := make([]string, len(os.Args))
-        copy(oldArgs, os.Args)
+		copy(oldArgs, os.Args)
 		defer func() { os.Args = oldArgs }()
 
 		commandName = strings.TrimSpace(os.Args[1])[len("--multiex-command="):]
 		os.Args = os.Args[1:]
-        os.Args[0] = oldArgs[0] // preserve path
+		os.Args[0] = oldArgs[0] // preserve path
 	} else {
 		commandName = os.Args[0]
 	}
