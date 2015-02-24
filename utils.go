@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-)
+    "sort")
 
 func init() {
 	Register(ExecutorDescribe{Name: "multiex", Function: MultiExUtilsMain, NoInstall: true})
@@ -54,7 +54,12 @@ func createSymlinks() {
 
 func printModules() {
 	fmt.Println("List of commands:")
-	for key, _ := range executors {
+    keys := make([]string, 0)
+    for key, _ := range executors {
+        keys = append(keys, key)
+    }
+    sort.Strings(keys)
+	for _, key := range keys {
 		fmt.Println(key)
 	}
 }
