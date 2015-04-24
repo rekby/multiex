@@ -21,7 +21,7 @@ See https://github.com/rekby/multiex-example
 Use named initialize for struct multiex.ExecutorDescribe. It can have additional fields in feauture.
 
 
-== multiex ==
+== multiex (по-русски) ==
 Multiex создан для уменьшения накладных расходов по месту, которое создается большим количеством мелких утилит, написанных
 на golang. Если компилировать каждую утилиту отдельно - каждая накладные расходы на каждую могут спокойно достигать 4-6Мб
 и больше, т.к. в каждый бинарник включается код всех используемых библиотек. Набор библиотек часто сходен: fmt, http и т.п.
