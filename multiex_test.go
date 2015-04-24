@@ -130,14 +130,14 @@ func TestMultiexMain(t *testing.T) {
 	}
 
 	c1 = false
-	os.Args = []string{"any-path", "--multiex-command=t1"}
+	os.Args = []string{"any-path", "t1"}
 	Main()
 	if !c1 {
 		t.Error("Explicit call t1")
 	}
 
 	c2 = false
-	os.Args = []string{"any-path", "--multiex-command=t2"}
+	os.Args = []string{"any-path", "t2"}
 	Main()
 	if !c2 {
 		t.Error("Explicit call t2")
@@ -183,9 +183,9 @@ func TestMultiexMain(t *testing.T) {
 		c4 = true
 	}
 	Register(ExecutorDescribe{Name: "t4", Function: t4})
-	os.Args = []string{"any-path", "--multiex-command=t4", "a1", "a2"}
+	os.Args = []string{"any-path", "t4", "a1", "a2"}
 	Main()
-	if len(os.Args) != 4 || os.Args[0] != "any-path" || os.Args[1] != "--multiex-command=t4" || os.Args[2] != "a1" || os.Args[3] != "a2" {
+	if len(os.Args) != 4 || os.Args[0] != "any-path" || os.Args[1] != "t4" || os.Args[2] != "a1" || os.Args[3] != "a2" {
 		t.Error("os.Args preserve when call function t4 by explicit name")
 	}
 	if !c4 {

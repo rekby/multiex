@@ -5,7 +5,6 @@ import (
 	"os"
 	"path"
 	"reflect"
-	"strings"
 )
 
 // Struct for describe included commands
@@ -70,29 +69,33 @@ func Register(module ExecutorDescribe) error {
 func Main() {
 	var commandName string
 
-	// check explicit command name in first argument
-	if len(os.Args) > 1 && strings.HasPrefix(os.Args[1], "--multiex-command=") {
-		// restore original args while exit
-		oldArgs := make([]string, len(os.Args))
-		copy(oldArgs, os.Args)
-		defer func() { os.Args = oldArgs }()
-
-		commandName = strings.TrimSpace(os.Args[1])[len("--multiex-command="):]
-		os.Args = os.Args[1:]
-		os.Args[0] = oldArgs[0] // preserve path
-	} else {
-		commandName = os.Args[0]
-	}
-
+	commandName = os.Args[0]
 	commandName = path.Base(commandName)
 	module, has := executors[commandName]
 	if !has {
+		// check explicit command name in first argument
+		if len(os.Args) > 1 {
+			// restore original args while exit
+			oldArgs := make([]string, len(os.Args))
+			copy(oldArgs, os.Args)
+			defer func() { os.Args = oldArgs }()
+
+			commandName = os.Args[1]
+			os.Args = os.Args[1:]
+			os.Args[0] = oldArgs[0] // preserve path
+		} else {
+		}
+
+		module, has = executors[commandName]
+	}
+
+	if has {
+		callWorker(module)
+	} else {
 		printUsage()
 		printModules()
 		return
 	}
-
-	callWorker(module)
 }
 
 func init() {

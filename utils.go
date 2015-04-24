@@ -62,7 +62,7 @@ func printModules() {
 func printUsage() {
 	fmt.Println(`
 Usages:
-    multiex [--multiex-command=...] args
+    multiex [command] args
 
     Multiex contain multiple independent commands into one executable file - for reduce size of many count small utilities
     with same golang runtime.
@@ -73,10 +73,10 @@ Usages:
     Where multiex may be name of file, symlink or hardlink with filename equals to command name. It is usual case and
     you can omit multiex-command parameter.
 
-    If param --multiex-command exist - name of executed file is ignored.
+    If binary haven't command with same name as call - first argument try usage as command name
 
     Exec
-    multiex --multiex-command=multiex install
+    multiex multiex install
     for create simlinks for all internal commands
 	`)
 }
