@@ -1,6 +1,6 @@
 == multiex ==
-Multiex module created for reduce size overhead by a lot of small utilities written in golang.
-If compile every utility independent - each will have 4-6MB overhead by golang runtime and same libraries: fmt, http, etc
+Multiex module created for reduce size overhead by a lot of small utilities written in golang. If compile every utility
+independent - each will have 4-6MB overhead by golang runtime and same libraries: fmt, http, etc
 
 Multiex module allow compile many utilities in one binary executable file with once runtime and libraries overhead.
 One of purpose is max simple adaptation current utilities and modules.
@@ -13,9 +13,33 @@ Usage of module very simple:
 # Register every utility in multiex from source code. It can be do from one main function or every small module can register own commands
 independent from own init function.
 # Compile
-# Create symlinks by command your-binary --multiex-command=multiex install
+# Create symlinks by command your-binary multiex install
 
 See https://github.com/rekby/multiex-example
 
 == Attention ==
 Use named initialize for struct multiex.ExecutorDescribe. It can have additional fields in feauture.
+
+
+== multiex ==
+Multiex создан для уменьшения накладных расходов по месту, которое создается большим количеством мелких утилит, написанных
+на golang. Если компилировать каждую утилиту отдельно - каждая накладные расходы на каждую могут спокойно достигать 4-6Мб
+и больше, т.к. в каждый бинарник включается код всех используемых библиотек. Набор библиотек часто сходен: fmt, http и т.п.
+
+Multiex позволяет скомпилировать много независимых утилит в один исполняемый файл с одной копией окружения и библиотек.
+Одна из целей - максимально простая адаптация текущих утилит и модулей для работы в составе multiex.
+
+=== Использование ===
+
+Использовать модуль очень просто:
+# Создать глобальный проект, который будет включать все мелкие модули/утилиты для компилирования в один бинарник
+# Зарегистрировать каждую утилиту в multiex в исходном коде. Это можно делать как из одной главной функции, собирающей в себя
+регистрацию всех модулей, так и из init-функции каждого модуля отдельно, независимо от других. Эту способы можно совмещать.
+# Скопмилировать
+# Создать символьные ссылки для всех включенных утилит командок your-binary multiex install
+
+Примеры можно посмотреть в https://github.com/rekby/multiex-example
+
+== Внимание ==
+Используйте для инициализации структуры multiex.ExecutorDescribe вариант с именоваными полями вместо, а не краткую форму.
+В будущем поля в эту структуру будут добавляться и короткая форма инициализации сломает компиляцию кода
