@@ -5,6 +5,8 @@ import (
 	"os"
 	"path"
 	"reflect"
+	"strings"
+	"io"
 )
 
 // Struct for describe included commands
@@ -89,6 +91,18 @@ func Register(module ExecutorDescribe) error {
 // Function to call from executable module for start process dispatch call
 // Функция для вызова из выполняемого файла для распознавания и вызова итогового обработчика
 func Main() {
+
+	// restore original args while exit
+	oldArgs := make([]string, len(os.Args))
+	copy(oldArgs, os.Args)
+
+	revert_args := func (){
+		os.Args = make([]string, len(oldArgs))
+		copy(os.Args, oldArgs)
+	}
+
+	defer func() { revert_args() }()
+
 	var commandName string
 
 	commandName = os.Args[0]
@@ -96,19 +110,39 @@ func Main() {
 	module, has := executors[commandName]
 	if !has {
 		// check explicit command name in first argument
+		// Проверка имени команды в первом аргументе
 		if len(os.Args) > 1 {
-			// restore original args while exit
-			oldArgs := make([]string, len(os.Args))
-			copy(oldArgs, os.Args)
-			defer func() { os.Args = oldArgs }()
 
 			commandName = os.Args[1]
 			os.Args = os.Args[1:]
-			os.Args[0] = oldArgs[0] // preserve path
-		} else {
+			os.Args[0] = oldArgs[0] // preserve path. Сохраняем путь к вызываемому бинарнику
+			module, has = executors[commandName]
+
+			// If doesn't find command - restore os.Args
+			// Если команду не нашли - восстанавливаем аргументы к начальному виду
+			if !has{
+				revert_args()
+			}
 		}
+	}
+
+	if !has && len(os.Args) > 1 && strings.HasPrefix(os.Args[1], "--multiex-command=") {
+		commandName = strings.TrimSpace(os.Args[1])[len("--multiex-command="):]
+		os.Args = os.Args[1:]
+		os.Args[0] = oldArgs[0] // preserve path. Сохраняем путь вызываемого бинарника
 
 		module, has = executors[commandName]
+		// If doesn't find command - restore os.Args
+		// Если команду не нашли - восстанавливаем аргументы к начальному виду
+		if !has{
+			revert_args()
+		}
+		if has {
+			io.WriteString(os.Stderr,
+`!!!WARNING!!! --multiex-command is deprecated and will remove in once of next updates
+!!!ВНИМАНИЕ!!! --multiex-command устарел и будет удалён в одном из следующих обновлений
+`)
+		}
 	}
 
 	if has {
