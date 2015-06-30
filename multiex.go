@@ -6,8 +6,9 @@ import (
 	"path"
 	"reflect"
 	"strings"
-	"io"
 )
+
+var installPrefix string = "" // Префикс, с которым будут устанавливаться все команды при вызове install.
 
 // Struct for describe included commands
 // ATTENTION: don't use short initialization form of structure (without field names) - it can have additional fields in
@@ -20,6 +21,7 @@ type ExecutorDescribe struct {
 	Function  func() // Pointer for function. Указатель на функцию.
 	Name      string // Name os command what was called. Имя команды, по которому функция будет вызываться.
 	NoInstall bool   // Don't create symlink when multiex install called. Не создавать ссылку при вызове команды установки.
+	Describtion string // Short description of command - show in commands list. Короткое описание команды, показывается в списке команд
 }
 
 // Task for function registration
@@ -107,7 +109,13 @@ func Main() {
 
 	commandName = os.Args[0]
 	commandName = path.Base(commandName)
+
+	if strings.HasPrefix(commandName,installPrefix) {
+		commandName = commandName[len(installPrefix):]
+	}
+
 	module, has := executors[commandName]
+
 	if !has {
 		// check explicit command name in first argument
 		// Проверка имени команды в первом аргументе
@@ -126,25 +134,6 @@ func Main() {
 		}
 	}
 
-	if !has && len(os.Args) > 1 && strings.HasPrefix(os.Args[1], "--multiex-command=") {
-		commandName = strings.TrimSpace(os.Args[1])[len("--multiex-command="):]
-		os.Args = os.Args[1:]
-		os.Args[0] = oldArgs[0] // preserve path. Сохраняем путь вызываемого бинарника
-
-		module, has = executors[commandName]
-		// If doesn't find command - restore os.Args
-		// Если команду не нашли - восстанавливаем аргументы к начальному виду
-		if !has{
-			revert_args()
-		}
-		if has {
-			io.WriteString(os.Stderr,
-`!!!WARNING!!! --multiex-command is deprecated and will remove in once of next updates
-!!!ВНИМАНИЕ!!! --multiex-command устарел и будет удалён в одном из следующих обновлений
-`)
-		}
-	}
-
 	if has {
 		callWorker(module)
 	} else {
@@ -152,6 +141,17 @@ func Main() {
 		printModules()
 		return
 	}
+}
+
+/*
+Set install prefix. While execute - prefix will cut before search command and prefix will prepend before name while
+install command. For example if prefix test_, then command find will be installed as test_find, but cn execute as binary find.
+The command have to execute always before multiex.Main exec.
+Задает "префикс установки" при выполнении команды install, т.е. если задан префикс test_, то для команды find будет создана
+ссылка с именем test_find. Команда всегда должна вызываться до вызова multiex.Main
+ */
+func SetInstallPrefix(prefix string){
+	installPrefix=prefix
 }
 
 func init() {

@@ -8,6 +8,7 @@ import (
 
 func testInit() {
 	executors = make(map[string]ExecutorDescribe)
+	SetInstallPrefix("")
 }
 
 func TestRegister(t *testing.T) {
@@ -46,29 +47,33 @@ func TestInstall(t *testing.T) {
 	dir_path, _ := filepath.Abs(os.Args[0])
 	dir_path = filepath.Dir(dir_path)
 	os.Args = []string{os.Args[0], "install"}
+	defer func() { os.Args = []string{os.Args[0]} }()
+
+	SetInstallPrefix("testprefix_")
+
 	f := func() {}
 	Register(ExecutorDescribe{Name: "test-1", Function: f})
-	defer func() { os.Remove(filepath.Join(dir_path, "test-1")) }()
+	defer func() { os.Remove(filepath.Join(dir_path, "testprefix_test-1")) }()
 	MultiExUtilsMain()
-	if _, err := os.Stat(filepath.Join(dir_path, "test-1")); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(dir_path, "testprefix_test-1")); os.IsNotExist(err) {
 		t.Error("Create simple link")
 	}
 
 	Register(ExecutorDescribe{Name: "test-2", Function: f})
 	Register(ExecutorDescribe{Name: "test-3", Function: f})
-	defer func() { os.Remove(filepath.Join(dir_path, "test-21")); os.Remove(filepath.Join(dir_path, "test-3")) }()
+	defer func() { os.Remove(filepath.Join(dir_path, "testprefix_test-21")); os.Remove(filepath.Join(dir_path, "testprefix_test-3")) }()
 	MultiExUtilsMain()
-	if _, err := os.Stat(filepath.Join(dir_path, "test-2")); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(dir_path, "testprefix_test-2")); os.IsNotExist(err) {
 		t.Error("Create second link after first")
 	}
-	if _, err := os.Stat(filepath.Join(dir_path, "test-3")); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(dir_path, "testprefix_test-3")); os.IsNotExist(err) {
 		t.Error("Create third link with second in same time")
 	}
 
 	Register(ExecutorDescribe{Name: "test-noninstall", Function: f, NoInstall: true})
-	defer func() { os.Remove(filepath.Join(dir_path, "test-noninstall")) }()
+	defer func() { os.Remove(filepath.Join(dir_path, "testprefix_test-noninstall")) }()
 	MultiExUtilsMain()
-	if _, err := os.Stat(filepath.Join(dir_path, "test-noninstall")); os.IsExist(err) {
+	if _, err := os.Stat(filepath.Join(dir_path, "testprefix_test-noninstall")); os.IsExist(err) {
 		t.Error("Don't create executor with NoInstall flag")
 	}
 }

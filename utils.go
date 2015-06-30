@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"sort"
+	"strconv"
 )
 
 func init() {
@@ -48,7 +50,7 @@ func createSymlinks() {
 			fmt.Printf("Skip create link by func definition (создание ссылки пропущено согласно настроек модуля): '%s'\n", module.Name)
 			continue
 		}
-		link_path := filepath.Join(dirname, module.Name)
+		link_path := filepath.Join(dirname, installPrefix + module.Name)
 		err = os.Symlink(basename, link_path)
 		if os.IsExist(err) {
 			fmt.Printf("File exists (файл существует): %s\n", link_path)
@@ -60,8 +62,20 @@ func createSymlinks() {
 
 func printModules() {
 	fmt.Println("List of commands (список команд):")
+	keys := make([]string, 0)
+	maxLen := 0
 	for key, _ := range executors {
-		fmt.Println(key)
+		keys = append(keys, key)
+		if len(key) > maxLen {
+			maxLen = len(key)
+		}
+	}
+
+	sort.Strings(keys)
+
+	format := "%-" + strconv.Itoa( maxLen) + "s - " + "%s\n"
+	for _, key := range keys {
+		fmt.Printf(format, key, executors[key].Describtion)
 	}
 }
 
@@ -90,7 +104,7 @@ Usages:
     Other commands for multiex module: ls, help, usage
 
 Использование:
-	multies [команда] аргументы
+	multiex [команда] аргументы
 
 	Multiex позволяет включить множество независимых команд в один исполняемый файл - для сокращения занимаемого места
 	большим количеством мелких утилит, разделяющих одно и то же окружение golang.
